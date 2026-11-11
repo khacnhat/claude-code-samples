@@ -6,7 +6,9 @@
       "Bash(.venv/bin/python .claude/skills/bang-chung/scripts/luu_bang_chung.py *)",
       "Bash(git status)",
       "Bash(git diff *)",
-      "Bash(git log *)"
+      "Bash(git log *)",
+      "mcp__so-thu-chi__get_fund_balance",
+      "mcp__so-thu-chi__list_unpaid_members"
     ],
     "deny": [
       "Read(./.env)",
