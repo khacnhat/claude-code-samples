@@ -1,0 +1,30 @@
+dc68d23 Bài 3.1: kết quả cuối, ghi chú và khai báo AI
+ so-thu-chi-clb/bang-chung/3.1/00-khai-bao-ai.md   |  6 ++++++
+ so-thu-chi-clb/bang-chung/3.1/01-ghi-chu.md       | 17 +++++++++++++++++
+ so-thu-chi-clb/bang-chung/3.1/06-ket-qua-cuoi.txt |  3 +++
+ 3 files changed, 26 insertions(+)
+f8d1736 ISSUE-003: tìm thành viên không phân biệt hoa thường, giữ dấu tiếng Việt
+ so-thu-chi-clb/app/services/members.py | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
+58e7d46 ISSUE-003: sửa kiểm thử so tập hợp, không phụ thuộc thứ tự sắp xếp
+ so-thu-chi-clb/tests/test_issue_003.py | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+99439bf ISSUE-003: kiểm thử tái hiện tìm kiếm phân biệt hoa thường (đang đỏ)
+ so-thu-chi-clb/bang-chung/3.1/05-issue-003-do.txt | 44 +++++++++++++++++++++++
+ so-thu-chi-clb/tests/test_issue_003.py            | 34 ++++++++++++++++++
+ 2 files changed, 78 insertions(+)
+c7ae6e9 ISSUE-002: báo cáo tháng tính cả giao dịch ngày cuối tháng
+ so-thu-chi-clb/app/services/reports.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+31168a7 ISSUE-002: kiểm thử tái hiện báo cáo tháng bỏ sót giao dịch (đang đỏ)
+ so-thu-chi-clb/bang-chung/3.1/04-issue-002-do.txt | 28 +++++++++++++++++++++++
+ so-thu-chi-clb/tests/test_issue_002.py            | 19 +++++++++++++++
+ 2 files changed, 47 insertions(+)
+2083800 ISSUE-001: số dư chỉ trừ khoản chi còn hiệu lực
+ so-thu-chi-clb/app/services/reports.py | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+1eb6545 ISSUE-001: kiểm thử tái hiện số dư vẫn trừ khoản chi đã hủy (đang đỏ)
+ so-thu-chi-clb/bang-chung/3.1/02-ban-dau.txt      |  3 +++
+ so-thu-chi-clb/bang-chung/3.1/03-issue-001-do.txt | 27 +++++++++++++++++++++++
+ so-thu-chi-clb/tests/test_issue_001.py            | 15 +++++++++++++
+ 3 files changed, 45 insertions(+)

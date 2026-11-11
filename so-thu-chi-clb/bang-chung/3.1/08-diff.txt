@@ -1,0 +1,166 @@
+diff --git a/so-thu-chi-clb/app/services/members.py b/so-thu-chi-clb/app/services/members.py
+index 4e8ff71..ef82276 100644
+--- a/so-thu-chi-clb/app/services/members.py
++++ b/so-thu-chi-clb/app/services/members.py
+@@ -2,6 +2,7 @@
+ 
+ import re
+ import sqlite3
++import unicodedata
+ 
+ from app.dates import parse_iso_date, today
+ from app.models import INCOME_DUES, MEMBER_ACTIVE, MEMBER_LEFT, Member
+@@ -30,11 +31,23 @@ def get_member(conn: sqlite3.Connection, member_id: int) -> Member | None:
+ 
+ def search_members(conn: sqlite3.Connection, query: str) -> list[Member]:
+     """Find members whose name or student code contains the query text."""
+-    query = query.strip()
++    query = _fold(query.strip())
+     members = list_members(conn)
+     if not query:
+         return members
+-    return [m for m in members if query in m.full_name or query in m.student_code]
++    return [
++        m for m in members if query in _fold(m.full_name) or query in _fold(m.student_code)
++    ]
++
++
++def _fold(text: str) -> str:
++    """Normalise text for case-insensitive matching, keeping Vietnamese diacritics.
++
++    NFC makes precomposed and combining forms of the same letter compare equal
++    (phone keyboards may send either); casefold handles upper/lower case,
++    including letters such as "Đ"/"đ".
++    """
++    return unicodedata.normalize("NFC", text).casefold()
+ 
+ 
+ def count_active_members(conn: sqlite3.Connection) -> int:
+diff --git a/so-thu-chi-clb/app/services/reports.py b/so-thu-chi-clb/app/services/reports.py
+index acafe00..a67b456 100644
+--- a/so-thu-chi-clb/app/services/reports.py
++++ b/so-thu-chi-clb/app/services/reports.py
+@@ -5,6 +5,7 @@ import sqlite3
+ from app.dates import current_month_key, month_key, month_range, parse_month
+ from app.models import EXPENSE_ACTIVE, INCOME_DUES, Expense, Income, Member
+ from app.money import round_vnd
++from app.services.ledger import total_active_expenses
+ from app.services.members import count_active_members, count_members_in_period
+ 
+ 
+@@ -14,9 +15,8 @@ def total_income(conn: sqlite3.Connection) -> int:
+ 
+ 
+ def fund_balance(conn: sqlite3.Connection) -> int:
+-    """Money currently in the fund: every income minus every expense."""
+-    spent = conn.execute("SELECT COALESCE(SUM(amount), 0) AS total FROM expenses").fetchone()
+-    return total_income(conn) - spent["total"]
++    """Money currently in the fund: every income minus every non-cancelled expense."""
++    return total_income(conn) - total_active_expenses(conn)
+ 
+ 
+ def monthly_report(conn: sqlite3.Connection, year: int, month: int) -> dict:
+@@ -30,7 +30,7 @@ def monthly_report(conn: sqlite3.Connection, year: int, month: int) -> dict:
+             """
+             SELECT i.*, m.full_name AS member_name
+             FROM incomes i LEFT JOIN members m ON m.id = i.member_id
+-            WHERE i.received_on >= ? AND i.received_on < ?
++            WHERE i.received_on BETWEEN ? AND ?
+             ORDER BY i.received_on, i.id
+             """,
+             (start, end),
+@@ -41,7 +41,7 @@ def monthly_report(conn: sqlite3.Connection, year: int, month: int) -> dict:
+         for row in conn.execute(
+             """
+             SELECT * FROM expenses
+-            WHERE status = ? AND spent_on >= ? AND spent_on < ?
++            WHERE status = ? AND spent_on BETWEEN ? AND ?
+             ORDER BY spent_on, id
+             """,
+             (EXPENSE_ACTIVE, start, end),
+diff --git a/so-thu-chi-clb/tests/test_issue_001.py b/so-thu-chi-clb/tests/test_issue_001.py
+new file mode 100644
+index 0000000..04195a1
+--- /dev/null
++++ b/so-thu-chi-clb/tests/test_issue_001.py
+@@ -0,0 +1,15 @@
++from app.services.ledger import cancel_expense
++from app.services.reports import fund_balance
++
++
++def test_cancelled_expense_no_longer_reduces_balance(conn, make_member, pay_dues, add_expense):
++    """ISSUE-001: cancelling an expense must bring the balance back."""
++    an = make_member("Nguyễn Văn An")
++    pay_dues(an.id, "2026-03", "2026-03-05", amount=500_000)
++    before = fund_balance(conn)
++
++    expense = add_expense("2026-03-10", 100_000, "Nhập nhầm")
++    assert fund_balance(conn) == before - 100_000
++
++    cancel_expense(conn, expense.id, "Nhập nhầm")
++    assert fund_balance(conn) == before
+diff --git a/so-thu-chi-clb/tests/test_issue_002.py b/so-thu-chi-clb/tests/test_issue_002.py
+new file mode 100644
+index 0000000..9c09f86
+--- /dev/null
++++ b/so-thu-chi-clb/tests/test_issue_002.py
+@@ -0,0 +1,19 @@
++from app.services.ledger import list_incomes, record_donation
++from app.services.reports import monthly_report
++
++
++def test_monthly_report_includes_every_day_of_the_month(conn, make_member, pay_dues, add_expense):
++    """ISSUE-002: the report must match the income list of the same month."""
++    an = make_member("Nguyễn Văn An")
++    binh = make_member("Trần Thị Bình")
++    pay_dues(an.id, "2026-03", "2026-03-01")
++    pay_dues(binh.id, "2026-03", "2026-03-31")
++    record_donation(conn, received_on="2026-03-31", amount=300_000, note="", created_by="thuquy")
++    add_expense("2026-03-01", 70_000)
++    add_expense("2026-03-31", 130_000, "Thuê loa", "Sự kiện")
++
++    report = monthly_report(conn, 2026, 3)
++
++    assert report["total_income"] == 400_000
++    assert report["total_expense"] == 200_000
++    assert report["total_income"] == sum(i.amount for i in list_incomes(conn, "2026-03"))
+diff --git a/so-thu-chi-clb/tests/test_issue_003.py b/so-thu-chi-clb/tests/test_issue_003.py
+new file mode 100644
+index 0000000..acd9e4c
+--- /dev/null
++++ b/so-thu-chi-clb/tests/test_issue_003.py
+@@ -0,0 +1,34 @@
++import pytest
++
++from app.services.members import search_members
++
++
++@pytest.fixture
++def club(make_member):
++    make_member("Nguyễn Văn An", student_code="SV2023001")
++    make_member("An Khánh Linh", student_code="SV2023002")
++    make_member("Ngô Phương Anh", student_code="SV2023003")
++    make_member("Đặng Quốc Bảo", student_code="SV2023004")
++    make_member("Trần Thị Bình", student_code="SV2023005")
++
++
++def names(conn, query):
++    return {m.full_name for m in search_members(conn, query)}
++
++
++def test_lowercase_query_finds_capitalised_names(conn, club):
++    """ISSUE-003: typing in lowercase must still find names."""
++    assert names(conn, "an") == {"An Khánh Linh", "Ngô Phương Anh", "Nguyễn Văn An"}
++
++
++def test_lowercase_family_name_with_diacritics(conn, club):
++    assert names(conn, "nguyễn") == {"Nguyễn Văn An"}
++    assert names(conn, "đặng") == {"Đặng Quốc Bảo"}
++
++
++def test_lowercase_student_code(conn, club):
++    assert names(conn, "sv2023001") == {"Nguyễn Văn An"}
++
++
++def test_exact_case_still_works(conn, club):
++    assert names(conn, "Bình") == {"Trần Thị Bình"}
