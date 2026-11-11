@@ -1,0 +1,28 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____________ test_monthly_report_includes_every_day_of_the_month ______________
+
+conn = <sqlite3.Connection object at 0x10afa7a60>
+make_member = <function make_member.<locals>._make at 0x10b0b1a60>
+pay_dues = <function pay_dues.<locals>._pay at 0x10b0b1c70>
+add_expense = <function add_expense.<locals>._add at 0x10b0b1e80>
+
+    def test_monthly_report_includes_every_day_of_the_month(conn, make_member, pay_dues, add_expense):
+        """ISSUE-002: the report must match the income list of the same month."""
+        an = make_member("Nguyễn Văn An")
+        binh = make_member("Trần Thị Bình")
+        pay_dues(an.id, "2026-03", "2026-03-01")
+        pay_dues(binh.id, "2026-03", "2026-03-31")
+        record_donation(conn, received_on="2026-03-31", amount=300_000, note="", created_by="thuquy")
+        add_expense("2026-03-01", 70_000)
+        add_expense("2026-03-31", 130_000, "Thuê loa", "Sự kiện")
+    
+        report = monthly_report(conn, 2026, 3)
+    
+>       assert report["total_income"] == 400_000
+E       assert 50000 == 400000
+
+tests/test_issue_002.py:17: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_issue_002.py::test_monthly_report_includes_every_day_of_the_month
+1 failed in 0.03s
