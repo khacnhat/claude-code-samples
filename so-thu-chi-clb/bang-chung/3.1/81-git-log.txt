@@ -1,0 +1,12 @@
+447f8ba Bài 3.1: hai hook chặn sửa kiểm thử và chạy kiểm thử, bằng chứng
+ so-thu-chi-clb/.claude/hooks/chan_sua_kiem_thu.py  |  47 +++++++
+ so-thu-chi-clb/.claude/hooks/chay_kiem_thu.py      |  65 ++++++++++
+ so-thu-chi-clb/.claude/settings.json               |  25 ++++
+ so-thu-chi-clb/bang-chung/3.1/00-khai-bao-ai.md    |  20 +++
+ so-thu-chi-clb/bang-chung/3.1/01-bao-cao.md        |  38 ++++++
+ so-thu-chi-clb/bang-chung/3.1/02-settings.json     |  42 +++++++
+ .../bang-chung/3.1/03-hook-chan-sua-kiem-thu.py    |  47 +++++++
+ .../bang-chung/3.1/04-hook-chay-kiem-thu.py        |  65 ++++++++++
+ so-thu-chi-clb/bang-chung/3.1/05-thu-bang-tay.txt  |   4 +
+ so-thu-chi-clb/bang-chung/3.1/90-phien-hook.md     | 136 +++++++++++++++++++++
+ 10 files changed, 489 insertions(+)
