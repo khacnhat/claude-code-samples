@@ -1,0 +1,27 @@
+commit 31eea70e4cec9260bd6f505caff3566f33bdb4fc
+Author: Nhat Nguyen Khac <khacnhat.info@gmail.com>
+Date:   Wed Nov 11 23:26:03 2026 +0700
+
+    Bài 4.3: báo cáo, kiểm chứng cấu hình, bản xuất phiên
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ so-thu-chi-clb/bang-chung/4.3/00-khai-bao-ai.md    |  6 +++
+ so-thu-chi-clb/bang-chung/4.3/01-bao-cao.md        | 37 +++++++++++++++++
+ .../bang-chung/4.3/02-kiem-tra-cau-hinh.md         | 15 +++++++
+ so-thu-chi-clb/bang-chung/4.3/03-settings.json     | 22 ++++++++++
+ .../bang-chung/4.3/90-phien-issue-005.md           | 48 ++++++++++++++++++++++
+ 5 files changed, 128 insertions(+)
+
+commit 0682905ccb370f60afc8a29b9fb1d7e0576b4342
+Author: Nhat Nguyen Khac <khacnhat.info@gmail.com>
+Date:   Wed Nov 11 23:22:18 2026 +0700
+
+    Cấu hình quyền cho agent: cấm đọc .env, xóa, đẩy mã, gọi mạng
+    
+    Kiểm thử và lệnh Git chỉ đọc chạy không cần hỏi; cài gói luôn hỏi. Dự án có bí mật trong .env và lệnh seed --reset xóa dữ liệu.
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ so-thu-chi-clb/.claude/settings.json | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
