@@ -1,0 +1,15 @@
+6251ebb Bài 4.2: máy chủ MCP so-thu-chi, kiểm thử, bằng chứng
+ so-thu-chi-clb/.claude/settings.json               |  4 +-
+ so-thu-chi-clb/.mcp.json                           |  9 +++
+ so-thu-chi-clb/bang-chung/4.2/00-khai-bao-ai.md    | 20 ++++++
+ so-thu-chi-clb/bang-chung/4.2/01-bao-cao.md        | 59 +++++++++++++++++
+ so-thu-chi-clb/bang-chung/4.2/02-server.py         | 71 ++++++++++++++++++++
+ .../bang-chung/4.2/03-test-mcp-server.py           | 77 ++++++++++++++++++++++
+ .../bang-chung/4.2/04-ket-qua-kiem-thu.txt         | 19 ++++++
+ so-thu-chi-clb/bang-chung/4.2/05-mcp.json          |  9 +++
+ so-thu-chi-clb/bang-chung/4.2/90-phien-mcp.md      | 55 ++++++++++++++++
+ so-thu-chi-clb/mcp_so_thu_chi/__init__.py          |  0
+ so-thu-chi-clb/mcp_so_thu_chi/server.py            | 71 ++++++++++++++++++++
+ so-thu-chi-clb/requirements-mcp.txt                |  1 +
+ so-thu-chi-clb/tests/test_mcp_server.py            | 77 ++++++++++++++++++++++
+ 13 files changed, 471 insertions(+), 1 deletion(-)
