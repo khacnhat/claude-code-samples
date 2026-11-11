@@ -1,0 +1,77 @@
+import sqlite3
+from contextlib import closing
+
+import pytest
+from mcp.server.mcpserver.exceptions import ToolError
+
+from app.services import members
+from app.services.reports import fund_balance, unpaid_members
+from mcp_so_thu_chi import server
+
+
+@pytest.fixture
+def db(conn, settings, monkeypatch):
+    """Point the MCP server at the test database (created by the `conn` fixture)."""
+    monkeypatch.setenv("DATABASE_PATH", settings.database_path)
+    return conn
+
+
+def test_fund_balance_matches_service(db, make_member, pay_dues, add_expense):
+    an = make_member("Nguyễn Văn An")
+    pay_dues(an.id, "2026-03", "2026-03-05", amount=150_000)
+    add_expense("2026-03-08", 40_000)
+
+    result = server.get_fund_balance()
+
+    assert result["balance_vnd"] == fund_balance(db) == 110_000
+
+
+def test_unpaid_list_matches_service(db, make_member, pay_dues):
+    an = make_member("Nguyễn Văn An", student_code="SV2026901")
+    binh = make_member("Trần Thị Bình", student_code="SV2026902")
+    chi = make_member("Lê Văn Chí", student_code="SV2026903")
+    members.mark_left(db, chi.id, "2026-03-20")
+    pay_dues(an.id, "2026-03", "2026-03-05")
+
+    result = server.list_unpaid_members("2026-03")
+
+    expected = unpaid_members(db, "2026-03")
+    assert result["month"] == "2026-03"
+    assert result["count"] == len(expected) == 2
+    assert result["truncated"] is False
+    assert result["members"] == [
+        {"full_name": m.full_name, "student_code": m.student_code, "status": m.status}
+        for m in expected
+    ]
+    assert {m["student_code"] for m in result["members"]} == {"SV2026902", "SV2026903"}
+    assert {"full_name": "Lê Văn Chí", "student_code": "SV2026903", "status": "left"} in result[
+        "members"
+    ]
+    assert binh.full_name in [m["full_name"] for m in result["members"]]
+
+
+def test_long_unpaid_list_is_truncated(db, make_member):
+    for i in range(server.MAX_ROWS + 5):
+        make_member(f"Thành viên {i:02d}")
+
+    result = server.list_unpaid_members("2026-03")
+
+    assert result["count"] == server.MAX_ROWS + 5
+    assert len(result["members"]) == server.MAX_ROWS
+    assert result["truncated"] is True
+
+
+@pytest.mark.parametrize("bad_month", ["11/2026", "2026-13", "2026-1", ""])
+def test_bad_month_raises_tool_error(db, bad_month):
+    with pytest.raises(ToolError, match="YYYY-MM"):
+        server.list_unpaid_members(bad_month)
+
+
+def test_read_only_connection_rejects_delete(db, make_member):
+    make_member("Nguyễn Văn An")
+
+    with closing(server._connect_read_only()) as ro:
+        with pytest.raises(sqlite3.OperationalError):
+            ro.execute("DELETE FROM members")
+
+    assert db.execute("SELECT COUNT(*) AS n FROM members").fetchone()["n"] == 1

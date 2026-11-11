@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "so-thu-chi": {
+      "type": "stdio",
+      "command": "${CLAUDE_PROJECT_DIR:-.}/.venv/bin/python",
+      "args": ["${CLAUDE_PROJECT_DIR:-.}/mcp_so_thu_chi/server.py"]
+    }
+  }
+}
