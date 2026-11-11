@@ -1,0 +1,27 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________ test_cancelled_expense_no_longer_reduces_balance _______________
+
+conn = <sqlite3.Connection object at 0x10caebb50>
+make_member = <function make_member.<locals>._make at 0x10cbf19b0>
+pay_dues = <function pay_dues.<locals>._pay at 0x10cbf1bc0>
+add_expense = <function add_expense.<locals>._add at 0x10cbf1dd0>
+
+    def test_cancelled_expense_no_longer_reduces_balance(conn, make_member, pay_dues, add_expense):
+        """ISSUE-001: cancelling an expense must bring the balance back."""
+        an = make_member("Nguyễn Văn An")
+        pay_dues(an.id, "2026-03", "2026-03-05", amount=500_000)
+        before = fund_balance(conn)
+    
+        expense = add_expense("2026-03-10", 100_000, "Nhập nhầm")
+        assert fund_balance(conn) == before - 100_000
+    
+        cancel_expense(conn, expense.id, "Nhập nhầm")
+>       assert fund_balance(conn) == before
+E       assert 400000 == 500000
+E        +  where 400000 = fund_balance(<sqlite3.Connection object at 0x10caebb50>)
+
+tests/test_issue_001.py:15: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_issue_001.py::test_cancelled_expense_no_longer_reduces_balance
+1 failed in 0.04s
