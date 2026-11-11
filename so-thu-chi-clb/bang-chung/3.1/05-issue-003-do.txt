@@ -1,0 +1,44 @@
+FFF.                                                                     [100%]
+=================================== FAILURES ===================================
+_________________ test_lowercase_query_finds_capitalised_names _________________
+
+conn = <sqlite3.Connection object at 0x10a903a60>, club = None
+
+    def test_lowercase_query_finds_capitalised_names(conn, club):
+        """ISSUE-003: typing in lowercase must still find names."""
+>       assert names(conn, "an") == ["An Khánh Linh", "Ngô Phương Anh", "Nguyễn Văn An"]
+E       AssertionError: assert [] == ['An Khánh Li...guyễn Văn An']
+E         
+E         Right contains 3 more items, first extra item: 'An Khánh Linh'
+E         Use -v to get more diff
+
+tests/test_issue_003.py:21: AssertionError
+__________________ test_lowercase_family_name_with_diacritics __________________
+
+conn = <sqlite3.Connection object at 0x10aa609a0>, club = None
+
+    def test_lowercase_family_name_with_diacritics(conn, club):
+>       assert names(conn, "nguyễn") == ["Nguyễn Văn An"]
+E       AssertionError: assert [] == ['Nguyễn Văn An']
+E         
+E         Right contains one more item: 'Nguyễn Văn An'
+E         Use -v to get more diff
+
+tests/test_issue_003.py:25: AssertionError
+_________________________ test_lowercase_student_code __________________________
+
+conn = <sqlite3.Connection object at 0x10aa61300>, club = None
+
+    def test_lowercase_student_code(conn, club):
+>       assert names(conn, "sv2023001") == ["Nguyễn Văn An"]
+E       AssertionError: assert [] == ['Nguyễn Văn An']
+E         
+E         Right contains one more item: 'Nguyễn Văn An'
+E         Use -v to get more diff
+
+tests/test_issue_003.py:30: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_issue_003.py::test_lowercase_query_finds_capitalised_names
+FAILED tests/test_issue_003.py::test_lowercase_family_name_with_diacritics - ...
+FAILED tests/test_issue_003.py::test_lowercase_student_code - AssertionError:...
+3 failed, 1 passed in 0.05s
