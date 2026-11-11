@@ -5,6 +5,7 @@ import sqlite3
 from app.dates import current_month_key, month_key, month_range, parse_month
 from app.models import EXPENSE_ACTIVE, INCOME_DUES, Expense, Income, Member
 from app.money import round_vnd
+from app.services.ledger import total_active_expenses
 from app.services.members import count_active_members, count_members_in_period
 
 
@@ -14,9 +15,8 @@ def total_income(conn: sqlite3.Connection) -> int:
 
 
 def fund_balance(conn: sqlite3.Connection) -> int:
-    """Money currently in the fund: every income minus every expense."""
-    spent = conn.execute("SELECT COALESCE(SUM(amount), 0) AS total FROM expenses").fetchone()
-    return total_income(conn) - spent["total"]
+    """Money currently in the fund: every income minus every non-cancelled expense."""
+    return total_income(conn) - total_active_expenses(conn)
 
 
 def monthly_report(conn: sqlite3.Connection, year: int, month: int) -> dict:
