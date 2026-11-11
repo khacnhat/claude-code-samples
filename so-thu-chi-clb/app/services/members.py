@@ -2,6 +2,7 @@
 
 import re
 import sqlite3
+import unicodedata
 
 from app.dates import parse_iso_date, today
 from app.models import INCOME_DUES, MEMBER_ACTIVE, MEMBER_LEFT, Member
@@ -30,11 +31,23 @@ def get_member(conn: sqlite3.Connection, member_id: int) -> Member | None:
 
 def search_members(conn: sqlite3.Connection, query: str) -> list[Member]:
     """Find members whose name or student code contains the query text."""
-    query = query.strip()
+    query = _fold(query.strip())
     members = list_members(conn)
     if not query:
         return members
-    return [m for m in members if query in m.full_name or query in m.student_code]
+    return [
+        m for m in members if query in _fold(m.full_name) or query in _fold(m.student_code)
+    ]
+
+
+def _fold(text: str) -> str:
+    """Normalise text for case-insensitive matching, keeping Vietnamese diacritics.
+
+    NFC makes precomposed and combining forms of the same letter compare equal
+    (phone keyboards may send either); casefold handles upper/lower case,
+    including letters such as "Đ"/"đ".
+    """
+    return unicodedata.normalize("NFC", text).casefold()
 
 
 def count_active_members(conn: sqlite3.Connection) -> int:
