@@ -30,7 +30,7 @@ def monthly_report(conn: sqlite3.Connection, year: int, month: int) -> dict:
             """
             SELECT i.*, m.full_name AS member_name
             FROM incomes i LEFT JOIN members m ON m.id = i.member_id
-            WHERE i.received_on >= ? AND i.received_on < ?
+            WHERE i.received_on BETWEEN ? AND ?
             ORDER BY i.received_on, i.id
             """,
             (start, end),
@@ -41,7 +41,7 @@ def monthly_report(conn: sqlite3.Connection, year: int, month: int) -> dict:
         for row in conn.execute(
             """
             SELECT * FROM expenses
-            WHERE status = ? AND spent_on >= ? AND spent_on < ?
+            WHERE status = ? AND spent_on BETWEEN ? AND ?
             ORDER BY spent_on, id
             """,
             (EXPENSE_ACTIVE, start, end),
