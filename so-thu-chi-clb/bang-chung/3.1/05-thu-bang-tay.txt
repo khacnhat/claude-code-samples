@@ -1,0 +1,4 @@
+Không được sửa tệp kiểm thử đã có: tests/test_money.py. Kiểm thử hiện có là đặc tả, không chỉnh để cho xanh. Hãy sửa mã trong app/ để kiểm thử qua, hoặc nếu cần thêm ca kiểm thử thì tạo một tệp kiểm thử MỚI trong tests/.
+tests/test_money.py exit=2
+tests/test_moi.py exit=0
+app/money.py exit=0
